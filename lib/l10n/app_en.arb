@@ -1,3 +1,9 @@
 {
+  "appTheme": "🎨 App theme",
+  "cancel": "Cancel",
+  "chooseTheme": "Choose the app''s theme:",
+  "darkTheme": "🌙 Dark",
+  "lightTheme": "☀ Light",
+  "systemTheme": "⚙ System",
   "title": "Objective Manager"
 }

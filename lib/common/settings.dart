@@ -9,6 +9,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart'
     show AppLocalizations;
 
 const appName = 'objective_manager';
+const appNamePlaceHolder = 'Objective Manager';
 
 final l10nNotifier = ValueNotifier<AppLocalizations?>(
   null,
@@ -24,4 +25,6 @@ class Settings {
   static String locale = const Locale.fromSubtags(
     languageCode: "en",
   ).toString();
+
+  static const themeKey = 'theme';
 }

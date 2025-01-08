@@ -1,24 +1,50 @@
+import 'dart:async' show FutureOr;
+
 import 'package:flutter/material.dart'
     show
         BuildContext,
-        ColorScheme,
-        Colors,
         Locale,
         MaterialApp,
         StatelessWidget,
-        ThemeData,
+        ThemeMode,
         ValueNotifier,
         Widget,
+        WidgetsFlutterBinding,
         runApp;
+import 'package:flutter/services.dart'
+    show Color, SystemChrome, SystemUiOverlayStyle;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart'
     show AppLocalizations;
-import 'package:objective_manager/common/settings.dart'
-    show Settings, l10nNotifier, navigatorState, snackState;
+import 'package:flutter_redux/flutter_redux.dart'
+    show StoreConnector, StoreProvider;
+import 'package:intl/date_symbol_data_local.dart' show initializeDateFormatting;
+import 'package:objective_manager/common/common.import.dart'
+    show appNamePlaceHolder, l10nNotifier, navigatorState, Settings, snackState;
+import 'package:objective_manager/models/models.import.dart' show StateModel;
+import 'package:objective_manager/redux/main.reducer.dart' show reducer;
+import 'package:objective_manager/themes/themes.import.dart' show dark, light;
 import 'package:objective_manager/ui/pages/home.page.dart' show MyHomePage;
+import 'package:objective_manager/utils/utils.import.dart' show logger;
+import 'package:provider/provider.dart' show MultiProvider, Provider;
+import 'package:redux/redux.dart' show Store;
+import 'package:redux_thunk/redux_thunk.dart' show thunkMiddleware;
+import 'package:shared_preferences/shared_preferences.dart'
+    show SharedPreferences;
 
 void main() {
-  runApp(
-    const MyApp(),
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // https://stackoverflow.com/questions/52489458/how-to-change-status-bar-color-in-flutter
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Color(
+        0xFFFFdd09,
+      ),
+    ),
+  );
+
+  SharedPreferences.getInstance().then(
+    initializeApp,
   );
 }
 
@@ -27,32 +53,106 @@ final ValueNotifier<int> counter = ValueNotifier<int>(
   0,
 );
 
+final _log = logger('main');
+
+FutureOr initializeApp(
+  SharedPreferences prefs,
+) async {
+  final themeName = prefs.getString(
+    Settings.themeKey,
+  );
+
+  await initializeDateFormatting(
+    "en",
+  );
+
+  _log('initializeApp').raw('theme', themeName).print();
+
+  final theme = (themeName?.isNotEmpty ?? false)
+      ? ThemeMode.values.byName(
+          themeName!,
+        )
+      : ThemeMode.system;
+
+  final store = Store<StateModel>(
+    reducer,
+    initialState: StateModel(
+      themeMode: theme,
+    ),
+    middleware: [
+      thunkMiddleware,
+    ],
+  );
+
+  runApp(
+    MyApp(
+      store: store,
+    ),
+  );
+}
+
 class MyApp extends StatelessWidget {
+  final Store<StateModel> store;
+
   const MyApp({
     super.key,
+    required this.store,
   });
 
   @override
   Widget build(
     BuildContext context,
   ) {
-    return MaterialApp(
-      title: 'Objective Manager',
-      onGenerateTitle: getTitleLocalized,
-      localeResolutionCallback: populateL10nNotifier,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
+    _log('build').print();
+
+    final dispatch = store.dispatch;
+
+    final themeLight = light(
+      context: context,
+    );
+
+    final themeDark = dark(
+      context: context,
+    );
+
+    return MultiProvider(
+      providers: [
+        Provider<
+            dynamic Function(
+              dynamic,
+            )>.value(
+          value: dispatch,
         ),
-        useMaterial3: true,
-      ),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      // TODO implement l10n switching
-      supportedLocales: AppLocalizations.supportedLocales,
-      navigatorKey: navigatorState,
-      scaffoldMessengerKey: snackState,
-      home: const MyHomePage(
-        title: 'Objective Manager',
+      ],
+      child: StoreProvider<StateModel>(
+        store: store,
+        child: StoreConnector<StateModel, ThemeMode>(
+          distinct: true,
+          converter: (
+            store,
+          ) =>
+              store.state.themeMode,
+          builder: (
+            context,
+            themeMode,
+          ) =>
+              MaterialApp(
+            title: appNamePlaceHolder,
+            onGenerateTitle: getTitleLocalized,
+            localeResolutionCallback: populateL10nNotifier,
+            theme: themeLight,
+            darkTheme: themeDark,
+            themeMode: themeMode,
+            home: const MyHomePage(
+              title: 'Objective Manager',
+            ),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            // TODO implement l10n switching
+            supportedLocales: AppLocalizations.supportedLocales,
+            navigatorKey: navigatorState,
+            scaffoldMessengerKey: snackState,
+          ),
+        ),
       ),
     );
   }

@@ -1,3 +1,9 @@
 {
+  "appTheme": "🎨 Tema do apl.",
+  "cancel": "Cancelar",
+  "chooseTheme": "Escolha o tema do aplicativo:",
+  "darkTheme": "🌙 Escuro",
+  "lightTheme": "☀ Claro",
+  "systemTheme": "⚙ Sistema",
   "title": "Gerenciador de Objetivos"
 }
