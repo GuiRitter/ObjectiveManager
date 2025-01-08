@@ -1,4 +1,20 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'
+    show
+        BuildContext,
+        ColorScheme,
+        Colors,
+        Locale,
+        MaterialApp,
+        StatelessWidget,
+        ThemeData,
+        ValueNotifier,
+        Widget,
+        runApp;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart'
+    show AppLocalizations;
+import 'package:objective_manager/common/settings.dart'
+    show Settings, l10nNotifier, navigatorState, snackState;
+import 'package:objective_manager/ui/pages/home.page.dart' show MyHomePage;
 
 void main() {
   runApp(
@@ -7,7 +23,7 @@ void main() {
 }
 
 /// value notifier for the count
-final ValueNotifier<int> _counter = ValueNotifier<int>(
+final ValueNotifier<int> counter = ValueNotifier<int>(
   0,
 );
 
@@ -22,75 +38,53 @@ class MyApp extends StatelessWidget {
   ) {
     return MaterialApp(
       title: 'Objective Manager',
+      onGenerateTitle: getTitleLocalized,
+      localeResolutionCallback: populateL10nNotifier,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.deepPurple,
         ),
         useMaterial3: true,
       ),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      // TODO implement l10n switching
+      supportedLocales: AppLocalizations.supportedLocales,
+      navigatorKey: navigatorState,
+      scaffoldMessengerKey: snackState,
       home: const MyHomePage(
         title: 'Objective Manager',
       ),
     );
   }
-}
 
-class MyHomePage extends StatelessWidget {
-  final String title;
-
-  const MyHomePage({
-    super.key,
-    required this.title,
-  });
-
-  @override
-  Widget build(
-    BuildContext context,
+  String getTitleLocalized(
+    context,
   ) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(
-          context,
-        ).colorScheme.inversePrimary,
-        title: Text(
-          title,
-        ),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            ValueListenableBuilder(
-              valueListenable: _counter,
-              builder: (
-                context,
-                value,
-                child,
-              ) =>
-                  Text(
-                '$value',
-                style: Theme.of(
-                  context,
-                ).textTheme.headlineMedium,
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment ',
-        child: const Icon(
-          Icons.add,
-        ),
-      ),
-    );
+    final l10n = AppLocalizations.of(
+      context,
+    )!;
+
+    return l10n.title;
   }
 
-  void _incrementCounter() {
-    _counter.value++;
+  Locale? populateL10nNotifier(
+    Locale? locale,
+    Iterable<Locale> supportedLocales,
+  ) {
+    AppLocalizations.delegate
+        .load(
+      locale!,
+    )
+        .then(
+      (
+        l10n,
+      ) {
+        Settings.locale = locale.toString();
+
+        return l10nNotifier.value = l10n;
+      },
+    );
+
+    return null;
   }
 }
