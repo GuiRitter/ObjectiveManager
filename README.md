@@ -1,0 +1,3 @@
+# check_lister
+
+Uses [Dartboard unlabeled.svg](https://commons.wikimedia.org/wiki/File:Dartboard_unlabeled.svg), [Veraltet.svg](https://commons.wikimedia.org/wiki/File:Veraltet.svg), [Dialog-accept.svg](https://commons.wikimedia.org/wiki/File:Dialog-accept.svg), [Emblem-notice.svg](https://commons.wikimedia.org/wiki/File:Emblem-notice.svg), [Emblem-wiki.svg](https://commons.wikimedia.org/wiki/File:Emblem-wiki.svg), [Board Wood SVG Vector](https://www.svgrepo.com/svg/203162/board-wood) and [Wood Board Wood SVG Vector](https://www.svgrepo.com/svg/284329/wood-board-wood).
